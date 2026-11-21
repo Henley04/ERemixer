@@ -1,0 +1,1293 @@
+{
+ "name": "stemfx-bsfilm",
+ "paper": "StemFX (ISMIR 2026), arXiv:2607.15634",
+ "ckpt": "best_checkpoint.pt",
+ "sample_rate": 44100,
+ "segment_samples": 441000,
+ "n_fft": 2048,
+ "hop_length": 512,
+ "n_mels": 80,
+ "n_subbands": 7,
+ "split_size": 20,
+ "overlap": 10,
+ "encoder_dim": 512,
+ "quantization": "W8A32 (int8 weights, fp32 activations, 32-sample blocks, symmetric)",
+ "vocab_size": 358,
+ "value_token_start": 257,
+ "num_value_bins": 101,
+ "stems": [
+  "vocals",
+  "bass",
+  "drums",
+  "other"
+ ],
+ "tokens": [
+  "[PAD]",
+  "[BOS]",
+  "[EOS]",
+  "[SEP]",
+  "vocals",
+  "bass",
+  "drums",
+  "other",
+  "am_add_color_noise",
+  "am_add_gaussian_noise",
+  "am_air_absorption",
+  "am_aliasing",
+  "am_bandpass_filter",
+  "am_bandstop_filter",
+  "am_bit_crush",
+  "am_clipping_distortion",
+  "am_gain",
+  "am_gain_transition",
+  "am_high_shelf_filter",
+  "am_highpass_filter",
+  "am_loudness_normalization",
+  "am_low_shelf_filter",
+  "am_lowpass_filter",
+  "am_normalize",
+  "am_peaking_filter",
+  "am_pitch_shift",
+  "am_polarity_inversion",
+  "am_reverse",
+  "am_seven_band_parametric_eq",
+  "am_tanh_distortion",
+  "am_time_stretch",
+  "lib_deemphasis",
+  "lib_pitch_shift",
+  "lib_preemphasis",
+  "lib_time_stretch",
+  "npy_lr_pan",
+  "npy_stereo_widener",
+  "pln_loudness_normalize",
+  "sci_bessel_highpass",
+  "sci_bessel_lowpass",
+  "sci_butter_bandpass",
+  "sci_butter_bandstop",
+  "sci_butter_highpass",
+  "sci_butter_lowpass",
+  "sci_cheby1_highpass",
+  "sci_cheby1_lowpass",
+  "sci_cheby2_lowpass",
+  "sci_fir_highpass",
+  "sci_fir_lowpass",
+  "sci_notch_iir",
+  "sci_peak_iir",
+  "sox_allpass",
+  "sox_bandpass",
+  "sox_bandreject",
+  "sox_bass",
+  "sox_chorus",
+  "sox_compand",
+  "sox_contrast",
+  "sox_dcshift",
+  "sox_deemph",
+  "sox_earwax",
+  "sox_echo",
+  "sox_echos",
+  "sox_equalizer",
+  "sox_flanger",
+  "sox_gain",
+  "sox_highpass",
+  "sox_loudness",
+  "sox_lowpass",
+  "sox_oops",
+  "sox_overdrive",
+  "sox_phaser",
+  "sox_pitch",
+  "sox_reverb",
+  "sox_speed",
+  "sox_tempo",
+  "sox_treble",
+  "sox_tremolo",
+  "sox_vol",
+  "ta_allpass_biquad",
+  "ta_bandpass_biquad",
+  "ta_bandreject_biquad",
+  "ta_bass_biquad",
+  "ta_contrast",
+  "ta_dcshift",
+  "ta_deemph_biquad",
+  "ta_equalizer_biquad",
+  "ta_gain",
+  "ta_highpass_biquad",
+  "ta_lowpass_biquad",
+  "ta_overdrive",
+  "ta_riaa_biquad",
+  "ta_treble_biquad",
+  "am_add_color_noise_f_decay",
+  "am_add_color_noise_snr_db",
+  "am_add_gaussian_noise_amplitude",
+  "am_air_absorption_distance",
+  "am_air_absorption_humidity",
+  "am_air_absorption_temperature",
+  "am_aliasing_target_sample_rate",
+  "am_bandpass_filter_bandwidth_fraction",
+  "am_bandpass_filter_center_freq",
+  "am_bandpass_filter_rolloff",
+  "am_bandstop_filter_bandwidth_fraction",
+  "am_bandstop_filter_center_freq",
+  "am_bandstop_filter_rolloff",
+  "am_bit_crush_bit_depth",
+  "am_clipping_distortion_percentile_threshold",
+  "am_gain_gain_db",
+  "am_gain_transition_duration",
+  "am_gain_transition_gain_db",
+  "am_high_shelf_filter_center_freq",
+  "am_high_shelf_filter_gain_db",
+  "am_high_shelf_filter_q",
+  "am_highpass_filter_cutoff_freq",
+  "am_highpass_filter_rolloff",
+  "am_loudness_normalization_lufs",
+  "am_low_shelf_filter_center_freq",
+  "am_low_shelf_filter_gain_db",
+  "am_low_shelf_filter_q",
+  "am_lowpass_filter_cutoff_freq",
+  "am_lowpass_filter_rolloff",
+  "am_peaking_filter_center_freq",
+  "am_peaking_filter_gain_db",
+  "am_peaking_filter_q",
+  "am_pitch_shift_semitones",
+  "am_seven_band_parametric_eq_gain_db",
+  "am_tanh_distortion_distortion",
+  "am_time_stretch_rate",
+  "lib_deemphasis_coef",
+  "lib_pitch_shift_n_steps",
+  "lib_preemphasis_coef",
+  "lib_time_stretch_rate",
+  "npy_lr_pan_pan",
+  "npy_stereo_widener_width",
+  "pln_loudness_normalize_target_lufs",
+  "sci_bessel_highpass_cutoff",
+  "sci_bessel_highpass_order",
+  "sci_bessel_lowpass_cutoff",
+  "sci_bessel_lowpass_order",
+  "sci_butter_bandpass_high_freq",
+  "sci_butter_bandpass_low_freq",
+  "sci_butter_bandpass_order",
+  "sci_butter_bandstop_high_freq",
+  "sci_butter_bandstop_low_freq",
+  "sci_butter_bandstop_order",
+  "sci_butter_highpass_cutoff",
+  "sci_butter_highpass_order",
+  "sci_butter_lowpass_cutoff",
+  "sci_butter_lowpass_order",
+  "sci_cheby1_highpass_cutoff",
+  "sci_cheby1_highpass_order",
+  "sci_cheby1_highpass_ripple",
+  "sci_cheby1_lowpass_cutoff",
+  "sci_cheby1_lowpass_order",
+  "sci_cheby1_lowpass_ripple",
+  "sci_cheby2_lowpass_attenuation",
+  "sci_cheby2_lowpass_cutoff",
+  "sci_cheby2_lowpass_order",
+  "sci_fir_highpass_cutoff",
+  "sci_fir_highpass_numtaps",
+  "sci_fir_lowpass_cutoff",
+  "sci_fir_lowpass_numtaps",
+  "sci_notch_iir_Q",
+  "sci_notch_iir_freq",
+  "sci_peak_iir_Q",
+  "sci_peak_iir_freq",
+  "sox_allpass_frequency",
+  "sox_allpass_width_q",
+  "sox_bandpass_frequency",
+  "sox_bandpass_width_q",
+  "sox_bandreject_frequency",
+  "sox_bandreject_width_q",
+  "sox_bass_frequency",
+  "sox_bass_gain_db",
+  "sox_bass_slope",
+  "sox_chorus_decay",
+  "sox_chorus_delay_ms",
+  "sox_chorus_depth",
+  "sox_chorus_gain_in",
+  "sox_chorus_gain_out",
+  "sox_chorus_speed",
+  "sox_compand_attack_time",
+  "sox_compand_decay_time",
+  "sox_compand_soft_knee_db",
+  "sox_contrast_amount",
+  "sox_dcshift_shift",
+  "sox_echo_decay",
+  "sox_echo_delay_ms",
+  "sox_echo_gain_in",
+  "sox_echo_gain_out",
+  "sox_echos_decay",
+  "sox_echos_delay_ms",
+  "sox_echos_gain_in",
+  "sox_echos_gain_out",
+  "sox_equalizer_frequency",
+  "sox_equalizer_gain_db",
+  "sox_equalizer_width_q",
+  "sox_flanger_delay",
+  "sox_flanger_depth",
+  "sox_flanger_regen",
+  "sox_flanger_speed",
+  "sox_flanger_width",
+  "sox_gain_gain_db",
+  "sox_highpass_frequency",
+  "sox_highpass_width_q",
+  "sox_loudness_gain_db",
+  "sox_loudness_reference_level",
+  "sox_lowpass_frequency",
+  "sox_lowpass_width_q",
+  "sox_overdrive_colour",
+  "sox_overdrive_gain_db",
+  "sox_phaser_decay",
+  "sox_phaser_delay",
+  "sox_phaser_gain_in",
+  "sox_phaser_gain_out",
+  "sox_phaser_speed",
+  "sox_pitch_n_semitones",
+  "sox_reverb_high_freq_damping",
+  "sox_reverb_pre_delay",
+  "sox_reverb_reverberance",
+  "sox_reverb_room_scale",
+  "sox_reverb_stereo_depth",
+  "sox_reverb_wet_gain",
+  "sox_speed_factor",
+  "sox_tempo_factor",
+  "sox_treble_frequency",
+  "sox_treble_gain_db",
+  "sox_treble_slope",
+  "sox_tremolo_depth",
+  "sox_tremolo_speed",
+  "sox_vol_gain",
+  "ta_allpass_biquad_Q",
+  "ta_allpass_biquad_central_freq",
+  "ta_bandpass_biquad_Q",
+  "ta_bandpass_biquad_central_freq",
+  "ta_bandreject_biquad_Q",
+  "ta_bandreject_biquad_central_freq",
+  "ta_bass_biquad_Q",
+  "ta_bass_biquad_central_freq",
+  "ta_bass_biquad_gain_db",
+  "ta_contrast_enhancement_amount",
+  "ta_dcshift_limiter_gain",
+  "ta_dcshift_shift",
+  "ta_equalizer_biquad_Q",
+  "ta_equalizer_biquad_center_freq",
+  "ta_equalizer_biquad_gain_db",
+  "ta_gain_gain_db",
+  "ta_highpass_biquad_Q",
+  "ta_highpass_biquad_cutoff_freq",
+  "ta_lowpass_biquad_Q",
+  "ta_lowpass_biquad_cutoff_freq",
+  "ta_overdrive_colour",
+  "ta_overdrive_gain",
+  "ta_treble_biquad_Q",
+  "ta_treble_biquad_central_freq",
+  "ta_treble_biquad_gain_db",
+  "VALUE_0",
+  "VALUE_1",
+  "VALUE_2",
+  "VALUE_3",
+  "VALUE_4",
+  "VALUE_5",
+  "VALUE_6",
+  "VALUE_7",
+  "VALUE_8",
+  "VALUE_9",
+  "VALUE_10",
+  "VALUE_11",
+  "VALUE_12",
+  "VALUE_13",
+  "VALUE_14",
+  "VALUE_15",
+  "VALUE_16",
+  "VALUE_17",
+  "VALUE_18",
+  "VALUE_19",
+  "VALUE_20",
+  "VALUE_21",
+  "VALUE_22",
+  "VALUE_23",
+  "VALUE_24",
+  "VALUE_25",
+  "VALUE_26",
+  "VALUE_27",
+  "VALUE_28",
+  "VALUE_29",
+  "VALUE_30",
+  "VALUE_31",
+  "VALUE_32",
+  "VALUE_33",
+  "VALUE_34",
+  "VALUE_35",
+  "VALUE_36",
+  "VALUE_37",
+  "VALUE_38",
+  "VALUE_39",
+  "VALUE_40",
+  "VALUE_41",
+  "VALUE_42",
+  "VALUE_43",
+  "VALUE_44",
+  "VALUE_45",
+  "VALUE_46",
+  "VALUE_47",
+  "VALUE_48",
+  "VALUE_49",
+  "VALUE_50",
+  "VALUE_51",
+  "VALUE_52",
+  "VALUE_53",
+  "VALUE_54",
+  "VALUE_55",
+  "VALUE_56",
+  "VALUE_57",
+  "VALUE_58",
+  "VALUE_59",
+  "VALUE_60",
+  "VALUE_61",
+  "VALUE_62",
+  "VALUE_63",
+  "VALUE_64",
+  "VALUE_65",
+  "VALUE_66",
+  "VALUE_67",
+  "VALUE_68",
+  "VALUE_69",
+  "VALUE_70",
+  "VALUE_71",
+  "VALUE_72",
+  "VALUE_73",
+  "VALUE_74",
+  "VALUE_75",
+  "VALUE_76",
+  "VALUE_77",
+  "VALUE_78",
+  "VALUE_79",
+  "VALUE_80",
+  "VALUE_81",
+  "VALUE_82",
+  "VALUE_83",
+  "VALUE_84",
+  "VALUE_85",
+  "VALUE_86",
+  "VALUE_87",
+  "VALUE_88",
+  "VALUE_89",
+  "VALUE_90",
+  "VALUE_91",
+  "VALUE_92",
+  "VALUE_93",
+  "VALUE_94",
+  "VALUE_95",
+  "VALUE_96",
+  "VALUE_97",
+  "VALUE_98",
+  "VALUE_99",
+  "VALUE_100"
+ ],
+ "params": {
+  "am_gain_gain_db": {
+   "min": -12.0,
+   "max": 12.0,
+   "log": false
+  },
+  "am_gain_transition_gain_db": {
+   "min": -24.0,
+   "max": 6.0,
+   "log": false
+  },
+  "am_gain_transition_duration": {
+   "min": 0.2,
+   "max": 6.0,
+   "log": false
+  },
+  "am_highpass_filter_cutoff_freq": {
+   "min": 20.0,
+   "max": 2400.0,
+   "log": true
+  },
+  "am_highpass_filter_rolloff": {
+   "min": 6.0,
+   "max": 24.0,
+   "log": false
+  },
+  "am_lowpass_filter_cutoff_freq": {
+   "min": 150.0,
+   "max": 7500.0,
+   "log": true
+  },
+  "am_lowpass_filter_rolloff": {
+   "min": 6.0,
+   "max": 24.0,
+   "log": false
+  },
+  "am_bandpass_filter_center_freq": {
+   "min": 200.0,
+   "max": 4000.0,
+   "log": true
+  },
+  "am_bandpass_filter_bandwidth_fraction": {
+   "min": 0.5,
+   "max": 1.99,
+   "log": false
+  },
+  "am_bandpass_filter_rolloff": {
+   "min": 6.0,
+   "max": 24.0,
+   "log": false
+  },
+  "am_bandstop_filter_center_freq": {
+   "min": 200.0,
+   "max": 4000.0,
+   "log": true
+  },
+  "am_bandstop_filter_bandwidth_fraction": {
+   "min": 0.5,
+   "max": 1.99,
+   "log": false
+  },
+  "am_bandstop_filter_rolloff": {
+   "min": 6.0,
+   "max": 24.0,
+   "log": false
+  },
+  "am_high_shelf_filter_center_freq": {
+   "min": 300.0,
+   "max": 7500.0,
+   "log": true
+  },
+  "am_high_shelf_filter_gain_db": {
+   "min": -18.0,
+   "max": 18.0,
+   "log": false
+  },
+  "am_high_shelf_filter_q": {
+   "min": 0.1,
+   "max": 0.999,
+   "log": false
+  },
+  "am_low_shelf_filter_center_freq": {
+   "min": 50.0,
+   "max": 4000.0,
+   "log": true
+  },
+  "am_low_shelf_filter_gain_db": {
+   "min": -18.0,
+   "max": 18.0,
+   "log": false
+  },
+  "am_low_shelf_filter_q": {
+   "min": 0.1,
+   "max": 0.999,
+   "log": false
+  },
+  "am_peaking_filter_center_freq": {
+   "min": 50.0,
+   "max": 7500.0,
+   "log": true
+  },
+  "am_peaking_filter_gain_db": {
+   "min": -24.0,
+   "max": 24.0,
+   "log": false
+  },
+  "am_peaking_filter_q": {
+   "min": 0.5,
+   "max": 5.0,
+   "log": false
+  },
+  "am_seven_band_parametric_eq_gain_db": {
+   "min": -12.0,
+   "max": 12.0,
+   "log": false
+  },
+  "am_tanh_distortion_distortion": {
+   "min": 0.01,
+   "max": 0.7,
+   "log": false
+  },
+  "am_clipping_distortion_percentile_threshold": {
+   "min": 0.0,
+   "max": 40.0,
+   "log": false
+  },
+  "am_bit_crush_bit_depth": {
+   "min": 4.0,
+   "max": 16.0,
+   "log": false
+  },
+  "am_aliasing_target_sample_rate": {
+   "min": 4000.0,
+   "max": 16000.0,
+   "log": false
+  },
+  "am_loudness_normalization_lufs": {
+   "min": -31.0,
+   "max": -13.0,
+   "log": false
+  },
+  "am_add_gaussian_noise_amplitude": {
+   "min": 0.001,
+   "max": 0.015,
+   "log": false
+  },
+  "am_add_color_noise_snr_db": {
+   "min": 3.0,
+   "max": 30.0,
+   "log": false
+  },
+  "am_add_color_noise_f_decay": {
+   "min": -6.0,
+   "max": 6.0,
+   "log": false
+  },
+  "am_air_absorption_temperature": {
+   "min": 10.0,
+   "max": 20.0,
+   "log": false
+  },
+  "am_air_absorption_humidity": {
+   "min": 30.0,
+   "max": 90.0,
+   "log": false
+  },
+  "am_air_absorption_distance": {
+   "min": 10.0,
+   "max": 100.0,
+   "log": false
+  },
+  "am_pitch_shift_semitones": {
+   "min": -4.0,
+   "max": 4.0,
+   "log": false
+  },
+  "am_time_stretch_rate": {
+   "min": 0.8,
+   "max": 1.25,
+   "log": false
+  },
+  "sox_bass_gain_db": {
+   "min": -12.0,
+   "max": 12.0,
+   "log": false
+  },
+  "sox_bass_frequency": {
+   "min": 50.0,
+   "max": 300.0,
+   "log": true
+  },
+  "sox_bass_slope": {
+   "min": 0.3,
+   "max": 0.7,
+   "log": false
+  },
+  "sox_treble_gain_db": {
+   "min": -12.0,
+   "max": 12.0,
+   "log": false
+  },
+  "sox_treble_frequency": {
+   "min": 2000.0,
+   "max": 10000.0,
+   "log": true
+  },
+  "sox_treble_slope": {
+   "min": 0.3,
+   "max": 0.7,
+   "log": false
+  },
+  "sox_equalizer_frequency": {
+   "min": 80.0,
+   "max": 12000.0,
+   "log": true
+  },
+  "sox_equalizer_width_q": {
+   "min": 0.5,
+   "max": 5.0,
+   "log": false
+  },
+  "sox_equalizer_gain_db": {
+   "min": -15.0,
+   "max": 15.0,
+   "log": false
+  },
+  "sox_highpass_frequency": {
+   "min": 20.0,
+   "max": 2000.0,
+   "log": true
+  },
+  "sox_highpass_width_q": {
+   "min": 0.5,
+   "max": 2.0,
+   "log": false
+  },
+  "sox_lowpass_frequency": {
+   "min": 1000.0,
+   "max": 18000.0,
+   "log": true
+  },
+  "sox_lowpass_width_q": {
+   "min": 0.5,
+   "max": 2.0,
+   "log": false
+  },
+  "sox_bandpass_frequency": {
+   "min": 200.0,
+   "max": 8000.0,
+   "log": true
+  },
+  "sox_bandpass_width_q": {
+   "min": 0.5,
+   "max": 5.0,
+   "log": false
+  },
+  "sox_bandreject_frequency": {
+   "min": 200.0,
+   "max": 8000.0,
+   "log": true
+  },
+  "sox_bandreject_width_q": {
+   "min": 0.5,
+   "max": 5.0,
+   "log": false
+  },
+  "sox_allpass_frequency": {
+   "min": 100.0,
+   "max": 8000.0,
+   "log": true
+  },
+  "sox_allpass_width_q": {
+   "min": 0.5,
+   "max": 5.0,
+   "log": false
+  },
+  "sox_compand_attack_time": {
+   "min": 0.001,
+   "max": 0.1,
+   "log": false
+  },
+  "sox_compand_decay_time": {
+   "min": 0.01,
+   "max": 1.0,
+   "log": false
+  },
+  "sox_compand_soft_knee_db": {
+   "min": 0.0,
+   "max": 12.0,
+   "log": false
+  },
+  "sox_contrast_amount": {
+   "min": 10.0,
+   "max": 100.0,
+   "log": false
+  },
+  "sox_overdrive_gain_db": {
+   "min": 5.0,
+   "max": 40.0,
+   "log": false
+  },
+  "sox_overdrive_colour": {
+   "min": 0.0,
+   "max": 100.0,
+   "log": false
+  },
+  "sox_reverb_reverberance": {
+   "min": 10.0,
+   "max": 90.0,
+   "log": false
+  },
+  "sox_reverb_high_freq_damping": {
+   "min": 10.0,
+   "max": 90.0,
+   "log": false
+  },
+  "sox_reverb_room_scale": {
+   "min": 10.0,
+   "max": 100.0,
+   "log": false
+  },
+  "sox_reverb_stereo_depth": {
+   "min": 0.0,
+   "max": 100.0,
+   "log": false
+  },
+  "sox_reverb_pre_delay": {
+   "min": 0.0,
+   "max": 50.0,
+   "log": false
+  },
+  "sox_reverb_wet_gain": {
+   "min": -10.0,
+   "max": 0.0,
+   "log": false
+  },
+  "sox_echo_gain_in": {
+   "min": 0.5,
+   "max": 0.9,
+   "log": false
+  },
+  "sox_echo_gain_out": {
+   "min": 0.3,
+   "max": 0.8,
+   "log": false
+  },
+  "sox_echo_delay_ms": {
+   "min": 50.0,
+   "max": 500.0,
+   "log": false
+  },
+  "sox_echo_decay": {
+   "min": 0.1,
+   "max": 0.6,
+   "log": false
+  },
+  "sox_echos_gain_in": {
+   "min": 0.5,
+   "max": 0.9,
+   "log": false
+  },
+  "sox_echos_gain_out": {
+   "min": 0.3,
+   "max": 0.8,
+   "log": false
+  },
+  "sox_echos_delay_ms": {
+   "min": 50.0,
+   "max": 500.0,
+   "log": false
+  },
+  "sox_echos_decay": {
+   "min": 0.1,
+   "max": 0.6,
+   "log": false
+  },
+  "sox_chorus_gain_in": {
+   "min": 0.5,
+   "max": 0.9,
+   "log": false
+  },
+  "sox_chorus_gain_out": {
+   "min": 0.3,
+   "max": 0.8,
+   "log": false
+  },
+  "sox_chorus_delay_ms": {
+   "min": 20.0,
+   "max": 80.0,
+   "log": false
+  },
+  "sox_chorus_decay": {
+   "min": 0.1,
+   "max": 0.5,
+   "log": false
+  },
+  "sox_chorus_speed": {
+   "min": 0.25,
+   "max": 4.0,
+   "log": false
+  },
+  "sox_chorus_depth": {
+   "min": 0.5,
+   "max": 5.0,
+   "log": false
+  },
+  "sox_flanger_delay": {
+   "min": 0.0,
+   "max": 10.0,
+   "log": false
+  },
+  "sox_flanger_depth": {
+   "min": 0.0,
+   "max": 10.0,
+   "log": false
+  },
+  "sox_flanger_regen": {
+   "min": -95.0,
+   "max": 95.0,
+   "log": false
+  },
+  "sox_flanger_width": {
+   "min": 0.0,
+   "max": 100.0,
+   "log": false
+  },
+  "sox_flanger_speed": {
+   "min": 0.1,
+   "max": 10.0,
+   "log": false
+  },
+  "sox_phaser_gain_in": {
+   "min": 0.5,
+   "max": 0.9,
+   "log": false
+  },
+  "sox_phaser_gain_out": {
+   "min": 0.5,
+   "max": 0.9,
+   "log": false
+  },
+  "sox_phaser_delay": {
+   "min": 1.0,
+   "max": 5.0,
+   "log": false
+  },
+  "sox_phaser_decay": {
+   "min": 0.1,
+   "max": 0.5,
+   "log": false
+  },
+  "sox_phaser_speed": {
+   "min": 0.1,
+   "max": 2.0,
+   "log": false
+  },
+  "sox_tremolo_speed": {
+   "min": 0.5,
+   "max": 10.0,
+   "log": false
+  },
+  "sox_tremolo_depth": {
+   "min": 10.0,
+   "max": 90.0,
+   "log": false
+  },
+  "sox_pitch_n_semitones": {
+   "min": -4.0,
+   "max": 4.0,
+   "log": false
+  },
+  "sox_tempo_factor": {
+   "min": 0.8,
+   "max": 1.25,
+   "log": false
+  },
+  "sox_speed_factor": {
+   "min": 0.85,
+   "max": 1.15,
+   "log": false
+  },
+  "sox_gain_gain_db": {
+   "min": -6.0,
+   "max": 6.0,
+   "log": false
+  },
+  "sox_vol_gain": {
+   "min": 0.5,
+   "max": 2.0,
+   "log": false
+  },
+  "sox_loudness_gain_db": {
+   "min": -10.0,
+   "max": 10.0,
+   "log": false
+  },
+  "sox_loudness_reference_level": {
+   "min": 50.0,
+   "max": 75.0,
+   "log": false
+  },
+  "sox_dcshift_shift": {
+   "min": -0.1,
+   "max": 0.1,
+   "log": false
+  },
+  "ta_overdrive_gain": {
+   "min": 5.0,
+   "max": 50.0,
+   "log": false
+  },
+  "ta_overdrive_colour": {
+   "min": 5.0,
+   "max": 80.0,
+   "log": false
+  },
+  "ta_contrast_enhancement_amount": {
+   "min": 10.0,
+   "max": 100.0,
+   "log": false
+  },
+  "ta_gain_gain_db": {
+   "min": -6.0,
+   "max": 6.0,
+   "log": false
+  },
+  "ta_dcshift_shift": {
+   "min": -0.05,
+   "max": 0.05,
+   "log": false
+  },
+  "ta_dcshift_limiter_gain": {
+   "min": 0.01,
+   "max": 0.05,
+   "log": false
+  },
+  "ta_bass_biquad_gain_db": {
+   "min": -12.0,
+   "max": 12.0,
+   "log": false
+  },
+  "ta_bass_biquad_central_freq": {
+   "min": 50.0,
+   "max": 300.0,
+   "log": true
+  },
+  "ta_bass_biquad_Q": {
+   "min": 0.5,
+   "max": 2.0,
+   "log": false
+  },
+  "ta_treble_biquad_gain_db": {
+   "min": -12.0,
+   "max": 12.0,
+   "log": false
+  },
+  "ta_treble_biquad_central_freq": {
+   "min": 2000.0,
+   "max": 10000.0,
+   "log": true
+  },
+  "ta_treble_biquad_Q": {
+   "min": 0.5,
+   "max": 2.0,
+   "log": false
+  },
+  "ta_equalizer_biquad_center_freq": {
+   "min": 80.0,
+   "max": 12000.0,
+   "log": true
+  },
+  "ta_equalizer_biquad_gain_db": {
+   "min": -15.0,
+   "max": 15.0,
+   "log": false
+  },
+  "ta_equalizer_biquad_Q": {
+   "min": 0.5,
+   "max": 5.0,
+   "log": false
+  },
+  "ta_highpass_biquad_cutoff_freq": {
+   "min": 20.0,
+   "max": 2000.0,
+   "log": true
+  },
+  "ta_highpass_biquad_Q": {
+   "min": 0.5,
+   "max": 2.0,
+   "log": false
+  },
+  "ta_lowpass_biquad_cutoff_freq": {
+   "min": 1000.0,
+   "max": 18000.0,
+   "log": true
+  },
+  "ta_lowpass_biquad_Q": {
+   "min": 0.5,
+   "max": 2.0,
+   "log": false
+  },
+  "ta_bandpass_biquad_central_freq": {
+   "min": 200.0,
+   "max": 8000.0,
+   "log": true
+  },
+  "ta_bandpass_biquad_Q": {
+   "min": 0.5,
+   "max": 5.0,
+   "log": false
+  },
+  "ta_bandreject_biquad_central_freq": {
+   "min": 200.0,
+   "max": 8000.0,
+   "log": true
+  },
+  "ta_bandreject_biquad_Q": {
+   "min": 0.5,
+   "max": 5.0,
+   "log": false
+  },
+  "ta_allpass_biquad_central_freq": {
+   "min": 100.0,
+   "max": 8000.0,
+   "log": true
+  },
+  "ta_allpass_biquad_Q": {
+   "min": 0.5,
+   "max": 5.0,
+   "log": false
+  },
+  "sci_butter_lowpass_order": {
+   "min": 2.0,
+   "max": 6.0,
+   "log": false
+  },
+  "sci_butter_lowpass_cutoff": {
+   "min": 1000.0,
+   "max": 18000.0,
+   "log": true
+  },
+  "sci_butter_highpass_order": {
+   "min": 2.0,
+   "max": 6.0,
+   "log": false
+  },
+  "sci_butter_highpass_cutoff": {
+   "min": 20.0,
+   "max": 2000.0,
+   "log": true
+  },
+  "sci_butter_bandpass_order": {
+   "min": 2.0,
+   "max": 4.0,
+   "log": false
+  },
+  "sci_butter_bandpass_low_freq": {
+   "min": 200.0,
+   "max": 1000.0,
+   "log": true
+  },
+  "sci_butter_bandpass_high_freq": {
+   "min": 2000.0,
+   "max": 10000.0,
+   "log": true
+  },
+  "sci_butter_bandstop_order": {
+   "min": 2.0,
+   "max": 4.0,
+   "log": false
+  },
+  "sci_butter_bandstop_low_freq": {
+   "min": 200.0,
+   "max": 1000.0,
+   "log": true
+  },
+  "sci_butter_bandstop_high_freq": {
+   "min": 2000.0,
+   "max": 10000.0,
+   "log": true
+  },
+  "sci_cheby1_lowpass_order": {
+   "min": 2.0,
+   "max": 6.0,
+   "log": false
+  },
+  "sci_cheby1_lowpass_ripple": {
+   "min": 0.5,
+   "max": 3.0,
+   "log": false
+  },
+  "sci_cheby1_lowpass_cutoff": {
+   "min": 1000.0,
+   "max": 18000.0,
+   "log": true
+  },
+  "sci_cheby1_highpass_order": {
+   "min": 2.0,
+   "max": 6.0,
+   "log": false
+  },
+  "sci_cheby1_highpass_ripple": {
+   "min": 0.5,
+   "max": 3.0,
+   "log": false
+  },
+  "sci_cheby1_highpass_cutoff": {
+   "min": 20.0,
+   "max": 2000.0,
+   "log": true
+  },
+  "sci_cheby2_lowpass_order": {
+   "min": 2.0,
+   "max": 6.0,
+   "log": false
+  },
+  "sci_cheby2_lowpass_attenuation": {
+   "min": 20.0,
+   "max": 60.0,
+   "log": false
+  },
+  "sci_cheby2_lowpass_cutoff": {
+   "min": 1000.0,
+   "max": 18000.0,
+   "log": true
+  },
+  "sci_bessel_lowpass_order": {
+   "min": 2.0,
+   "max": 6.0,
+   "log": false
+  },
+  "sci_bessel_lowpass_cutoff": {
+   "min": 1000.0,
+   "max": 18000.0,
+   "log": true
+  },
+  "sci_bessel_highpass_order": {
+   "min": 2.0,
+   "max": 6.0,
+   "log": false
+  },
+  "sci_bessel_highpass_cutoff": {
+   "min": 20.0,
+   "max": 2000.0,
+   "log": true
+  },
+  "sci_notch_iir_freq": {
+   "min": 50.0,
+   "max": 8000.0,
+   "log": true
+  },
+  "sci_notch_iir_Q": {
+   "min": 1.0,
+   "max": 30.0,
+   "log": false
+  },
+  "sci_peak_iir_freq": {
+   "min": 80.0,
+   "max": 12000.0,
+   "log": true
+  },
+  "sci_peak_iir_Q": {
+   "min": 1.0,
+   "max": 30.0,
+   "log": false
+  },
+  "sci_fir_lowpass_numtaps": {
+   "min": 31.0,
+   "max": 255.0,
+   "log": false
+  },
+  "sci_fir_lowpass_cutoff": {
+   "min": 1000.0,
+   "max": 18000.0,
+   "log": true
+  },
+  "sci_fir_highpass_numtaps": {
+   "min": 31.0,
+   "max": 255.0,
+   "log": false
+  },
+  "sci_fir_highpass_cutoff": {
+   "min": 20.0,
+   "max": 2000.0,
+   "log": true
+  },
+  "pln_loudness_normalize_target_lufs": {
+   "min": -23.0,
+   "max": -9.0,
+   "log": false
+  },
+  "lib_pitch_shift_n_steps": {
+   "min": -4.0,
+   "max": 4.0,
+   "log": false
+  },
+  "lib_time_stretch_rate": {
+   "min": 0.85,
+   "max": 1.15,
+   "log": false
+  },
+  "lib_preemphasis_coef": {
+   "min": 0.9,
+   "max": 0.99,
+   "log": false
+  },
+  "lib_deemphasis_coef": {
+   "min": 0.9,
+   "max": 0.99,
+   "log": false
+  },
+  "npy_lr_pan_pan": {
+   "min": -1.0,
+   "max": 1.0,
+   "log": false
+  },
+  "npy_stereo_widener_width": {
+   "min": 0.0,
+   "max": 2.0,
+   "log": false
+  }
+ },
+ "fx_types": [
+  "am_add_color_noise",
+  "am_add_gaussian_noise",
+  "am_air_absorption",
+  "am_aliasing",
+  "am_bandpass_filter",
+  "am_bandstop_filter",
+  "am_bit_crush",
+  "am_clipping_distortion",
+  "am_gain",
+  "am_gain_transition",
+  "am_high_shelf_filter",
+  "am_highpass_filter",
+  "am_loudness_normalization",
+  "am_low_shelf_filter",
+  "am_lowpass_filter",
+  "am_normalize",
+  "am_peaking_filter",
+  "am_pitch_shift",
+  "am_polarity_inversion",
+  "am_reverse",
+  "am_seven_band_parametric_eq",
+  "am_tanh_distortion",
+  "am_time_stretch",
+  "lib_deemphasis",
+  "lib_pitch_shift",
+  "lib_preemphasis",
+  "lib_time_stretch",
+  "npy_lr_pan",
+  "npy_stereo_widener",
+  "pln_loudness_normalize",
+  "sci_bessel_highpass",
+  "sci_bessel_lowpass",
+  "sci_butter_bandpass",
+  "sci_butter_bandstop",
+  "sci_butter_highpass",
+  "sci_butter_lowpass",
+  "sci_cheby1_highpass",
+  "sci_cheby1_lowpass",
+  "sci_cheby2_lowpass",
+  "sci_fir_highpass",
+  "sci_fir_lowpass",
+  "sci_notch_iir",
+  "sci_peak_iir",
+  "sox_allpass",
+  "sox_bandpass",
+  "sox_bandreject",
+  "sox_bass",
+  "sox_chorus",
+  "sox_compand",
+  "sox_contrast",
+  "sox_dcshift",
+  "sox_deemph",
+  "sox_earwax",
+  "sox_echo",
+  "sox_echos",
+  "sox_equalizer",
+  "sox_flanger",
+  "sox_gain",
+  "sox_highpass",
+  "sox_loudness",
+  "sox_lowpass",
+  "sox_oops",
+  "sox_overdrive",
+  "sox_phaser",
+  "sox_pitch",
+  "sox_reverb",
+  "sox_speed",
+  "sox_tempo",
+  "sox_treble",
+  "sox_tremolo",
+  "sox_vol",
+  "ta_allpass_biquad",
+  "ta_bandpass_biquad",
+  "ta_bandreject_biquad",
+  "ta_bass_biquad",
+  "ta_contrast",
+  "ta_dcshift",
+  "ta_deemph_biquad",
+  "ta_equalizer_biquad",
+  "ta_gain",
+  "ta_highpass_biquad",
+  "ta_lowpass_biquad",
+  "ta_overdrive",
+  "ta_riaa_biquad",
+  "ta_treble_biquad"
+ ]
+}

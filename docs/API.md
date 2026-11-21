@@ -154,6 +154,72 @@ curl -s localhost:$PORT/automation -H "Authorization: Bearer $TOKEN" \
 ```
 或通过 CLI：`SXSEditor --cli plugin call onemix-mixer.mixFiles --params '{...}' --json`
 
+## 风格迁移（StemFX）
+
+独立于 `MixRequest` 的一条能力线：输入源/参考两套分轨，输出"效果器链 + 渲染结果"。
+
+### CLI
+
+```bash
+# 目录扫描（按文件名识别 vocals/bass/drums/other）
+mixer-cli stemfx --source-dir my_stems --reference-dir ref_stems -o out.wav --lufs -23
+
+# 逐轨显式指定（缺失轨按静音补齐，模型要求固定 4 轨）
+mixer-cli stemfx --source a.wav:vocals --source b.wav:bass \
+                 --reference r1.wav:vocals --reference r2.wav:other -o out.wav
+
+# 只预测不渲染 + JSON；--stems-out 逐轨导出 24-bit WAV
+mixer-cli stemfx --source-dir a --reference-dir b --dry-run --json
+mixer-cli stemfx --source-dir a --reference-dir b -o out.wav --stems-out stems_out
+```
+
+| 参数 | 默认 | 说明 |
+|---|---|---|
+| `--source` / `--reference` | — | `path[:instrument]`，instrument ∈ `vocals/bass/drums/other` |
+| `--source-dir` / `--reference-dir` | — | 扫描目录内 `*.wav`，按文件名推断乐器 |
+| `-o, --output` | 必填 | 成品 WAV（24-bit / 44.1 kHz） |
+| `--stems-out` | — | 逐轨导出目录 |
+| `--dry-run` | false | 只解码效果链，不渲染、不写盘 |
+| `--max-tokens` | 512 | 自回归步数上限 |
+| `--lufs` | 无 | 渲染后逐轨响度归一的目标值（如 `-23`） |
+| `--models-dir` | 无 | 外置 `stemfx/*.onnx` 目录；缺省用内嵌权重 |
+| `--json` / `--quiet` | false | 机器可读输出 / 静默 |
+
+### JSON 输出
+
+```json
+{
+  "ok": true,
+  "output_path": "out.wav",
+  "dry_run": false,
+  "sample_rate": 44100,
+  "elapsed_ms": 2512,
+  "tokens": 29,
+  "chain": {"stems": [{"stem": "vocals", "chain": [{"effect": "am_lowpass_filter",
+              "params": {"cutoff_freq": 1341.0, "rolloff": 23.8}}]}]},
+  "applied": ["vocals:am_lowpass_filter", "bass:ta_bandreject_biquad"],
+  "skipped": ["other:sox_tempo"],
+  "stems": [{"stem": "vocals", "frames": 220500, "duration_sec": 5.0}]
+}
+```
+
+`skipped` 列出无法在不变速/不变调前提下实现的效果器（`*pitch_shift`、`*time_stretch`、`sox_tempo`、`sox_speed`），属能力边界，不会静默丢弃。
+
+### Rust API
+
+```rust
+use mixer_core::stemfx::{self, StemSet, StyleOptions};
+
+let src = StemSet::from_specs(&[("vocals.wav".into(), "vocals".into())])?;
+let r#ref = StemSet::from_specs(&[("ref.wav".into(), "other".into())])?;
+let opts = StyleOptions { max_tokens: 512, target_lufs: None, models_dir: None, render: true };
+let res = stemfx::transfer(&src, &r#ref, &opts, &|| false)?;
+println!("{}", res.pretty);                       // 人可读效果链
+mixer_core::write_wav("out.wav", &res.mixdown(), 24)?;
+```
+
+`StyleResult` 字段：`chain`（结构化效果链）、`pretty`（文本）、`tokens`（token 名序列）、`applied` / `skipped`、`stems`（逐轨 44.1 kHz 立体声）、`sample_rate`、`elapsed_ms`。
+
 ## ProgressEvent
 ```json
 { "percent": 45, "stage": "人声链(HPF/EQ/压缩/增益)", "detail": null }

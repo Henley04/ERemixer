@@ -10,8 +10,11 @@ serde_json.workspace = true
 hound.workspace = true
 thiserror.workspace = true
 ort = { version = "=2.0.0-rc.15", default-features = false, features = ["std", "load-dynamic", "api-17"], optional = true }
+rustfft = { version = "6", optional = true }
 
 [features]
-default = ["nn"]
+default = ["nn", "stemfx"]
 # NN 增强层（ONNX Runtime 动态加载）。关闭后仅使用纯 DSP 混音链，无需任何原生库。
 nn = ["dep:ort"]
+# StemFX 风格迁移（内嵌 W8A32 ONNX 权重，依赖 ort + rustfft）
+stemfx = ["nn", "dep:rustfft"]

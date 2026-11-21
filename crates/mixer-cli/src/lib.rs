@@ -113,6 +113,45 @@ enum Command {
     Config,
     /// 探测 WAV 信息。
     Probe { path: String },
+    /// StemFX 混音风格迁移：按参考曲目的混音风格，为自己的分轨生成并应用效果器链。
+    Stemfx {
+        /// 源分轨，可重复：path:instrument（instrument ∈ vocals/bass/drums/other）。
+        #[arg(long, value_name = "SPEC")]
+        source: Vec<String>,
+        /// 源分轨目录（按文件名自动识别 vocals/bass/drums/other 四个 wav）。
+        #[arg(long)]
+        source_dir: Option<String>,
+        /// 参考分轨，可重复：path:instrument。
+        #[arg(long, value_name = "SPEC")]
+        reference: Vec<String>,
+        /// 参考分轨目录。
+        #[arg(long)]
+        reference_dir: Option<String>,
+        /// 输出成品 WAV（44.1 kHz）。`--dry-run` 时可省略。
+        #[arg(short = 'o', long, required_unless_present = "dry_run")]
+        output: Option<String>,
+        /// 同时输出四条处理后的分轨到该目录。
+        #[arg(long)]
+        stems_out: Option<String>,
+        /// 只预测效果器链，不渲染音频。
+        #[arg(long)]
+        dry_run: bool,
+        /// 解码步数上限。
+        #[arg(long, default_value_t = 512)]
+        max_tokens: usize,
+        /// 渲染后按该响度归一（LUFS）；省略则保持电平。
+        #[arg(long, allow_hyphen_values = true)]
+        lufs: Option<f32>,
+        /// 模型资源目录（含 native/ 与 stemfx/）。
+        #[arg(long)]
+        models_dir: Option<String>,
+        /// 以 JSON 输出结果。
+        #[arg(long)]
+        json: bool,
+        /// 静默模式。
+        #[arg(short = 'q', long)]
+        quiet: bool,
+    },
 }
 
 fn print_progress(e: ProgressEvent) {
@@ -410,6 +449,11 @@ fn dispatch(cli: Cli) -> i32 {
             println!("{}", serde_json::to_string_pretty(&MixRequest::default()).unwrap());
             0
         }
+        Command::Stemfx {
+            source, source_dir, reference, reference_dir, output, stems_out,
+            dry_run, max_tokens, lufs, models_dir, json, quiet,
+        } => cmd_stemfx(source, source_dir, reference, reference_dir, output, stems_out,
+                        dry_run, max_tokens, lufs, models_dir, json, quiet),
         Command::Probe { path } => {
             match read_wav(&path) {
                 Ok(buf) => {
@@ -436,4 +480,149 @@ fn dispatch(cli: Cli) -> i32 {
 pub fn run() -> i32 {
     let args: Vec<String> = std::env::args().collect();
     run_with_args(args)
+}
+
+/// 收集分轨：显式 `path:instrument` 规格 + 目录自动识别。
+fn collect_stems(
+    specs: &[String],
+    dir: Option<&str>,
+    label: &str,
+) -> std::result::Result<mixer_core::stemfx::StemSet, String> {
+    let mut pairs: Vec<(String, String)> = Vec::new();
+    for spec in specs {
+        let si = parse_stem_spec(spec)?;
+        let inst = if si.instrument == Instrument::Auto {
+            Instrument::infer(&si.path)
+        } else {
+            si.instrument
+        };
+        pairs.push((si.path, inst.as_str().to_string()));
+    }
+    if let Some(d) = dir {
+        let rd = std::fs::read_dir(d).map_err(|e| format!("无法读取目录 {}: {}", d, e))?;
+        let mut found = 0;
+        for entry in rd.flatten() {
+            let path = entry.path();
+            if path.extension().and_then(|e| e.to_str()).map(|e| e.eq_ignore_ascii_case("wav")) != Some(true) {
+                continue;
+            }
+            let p = path.to_string_lossy().to_string();
+            let inst = Instrument::infer(&p);
+            pairs.push((p, inst.as_str().to_string()));
+            found += 1;
+        }
+        if found == 0 {
+            return Err(format!("目录 {} 中没有 wav 文件", d));
+        }
+    }
+    if pairs.is_empty() {
+        return Err(format!("没有 {} 分轨输入", label));
+    }
+    mixer_core::stemfx::StemSet::from_specs(&pairs).map_err(|e| e.to_string())
+}
+
+#[allow(clippy::too_many_arguments)]
+fn cmd_stemfx(
+    source: Vec<String>,
+    source_dir: Option<String>,
+    reference: Vec<String>,
+    reference_dir: Option<String>,
+    output: Option<String>,
+    stems_out: Option<String>,
+    dry_run: bool,
+    max_tokens: usize,
+    lufs: Option<f32>,
+    models_dir: Option<String>,
+    json: bool,
+    quiet: bool,
+) -> i32 {
+    let output = match (dry_run, output) {
+        (false, Some(p)) if !p.trim().is_empty() => p,
+        (false, _) => {
+            eprintln!("✗ 需要 -o/--output 指定输出文件（或加 --dry-run 只预览效果链）");
+            return 2;
+        }
+        (true, p) => p.unwrap_or_default(),
+    };
+    let src = match collect_stems(&source, source_dir.as_deref(), "源") {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("✗ {}", e);
+            return 2;
+        }
+    };
+    let refs = match collect_stems(&reference, reference_dir.as_deref(), "参考") {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("✗ {}", e);
+            return 2;
+        }
+    };
+
+    let opts = mixer_core::stemfx::StyleOptions {
+        max_tokens,
+        target_lufs: lufs,
+        models_dir: models_dir.clone(),
+        render: !dry_run,
+    };
+    if !quiet && !json {
+        eprintln!("[stemfx] 编码风格嵌入 + 自回归预测效果链 …");
+    }
+    let res = match mixer_core::stemfx::transfer(&src, &refs, &opts, &|| false) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("✗ StemFX 迁移失败: {}", e);
+            return 1;
+        }
+    };
+
+    if !dry_run {
+        let mix = res.mixdown();
+        if let Err(e) = mixer_core::write_wav(&output, &mix, 24) {
+            eprintln!("✗ 写出失败: {}", e);
+            return 1;
+        }
+        if let Some(dir) = stems_out.as_deref() {
+            if let Err(e) = std::fs::create_dir_all(dir) {
+                eprintln!("✗ 创建目录失败: {}", e);
+                return 1;
+            }
+            for (name, buf) in &res.stems {
+                let p = format!("{}/{}.wav", dir.trim_end_matches(['/', '\\']), name);
+                if let Err(e) = mixer_core::write_wav(&p, buf, 24) {
+                    eprintln!("✗ 写出 {} 失败: {}", p, e);
+                    return 1;
+                }
+            }
+        }
+    }
+
+    if json {
+        let out = serde_json::json!({
+            "ok": true,
+            "output_path": if dry_run { "" } else { output.as_str() },
+            "dry_run": dry_run,
+            "sample_rate": res.sample_rate,
+            "elapsed_ms": res.elapsed_ms,
+            "tokens": res.tokens.len(),
+            "chain": res.chain,
+            "applied": res.applied,
+            "skipped": res.skipped,
+            "stems": res.stems.iter().map(|(n, b)| serde_json::json!({
+                "stem": n, "frames": b.frames(), "duration_sec": b.duration_sec(),
+            })).collect::<Vec<_>>(),
+        });
+        println!("{}", serde_json::to_string_pretty(&out).unwrap());
+    } else {
+        println!("✓ StemFX 风格迁移完成（{} ms, {} 个 token）", res.elapsed_ms, res.tokens.len());
+        println!("预测效果链：");
+        print!("{}", res.pretty);
+        if !res.skipped.is_empty() {
+            println!("⚠ 已跳过的效果器（本实现不覆盖，多为变调/变速类）: {}", res.skipped.join(", "));
+        }
+        if !dry_run {
+            println!("成品: {}  (44.1 kHz, 24-bit)", output);
+        }
+    }
+    0
 }

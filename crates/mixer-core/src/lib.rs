@@ -8,7 +8,11 @@ pub mod audio;
 pub mod dsp;
 pub mod error;
 pub mod nn;
+#[cfg(feature = "nn")]
+pub mod ort_env;
 pub mod pipeline;
+#[cfg(feature = "stemfx")]
+pub mod stemfx;
 
 pub use api::{MixRequest, MixResult, Preset, ProgressEvent};
 pub use audio::{resample_buffer, resample_linear, read_wav, to_stereo, write_wav, AudioBuffer};

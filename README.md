@@ -1,10 +1,10 @@
 # OneMix — 一键混音（分轨 / 成品 → 成品母带）
 
-OneMix 是一个**高度自动化的本地混音系统**：既可以输入多条已分离的乐器分轨一键混成成品，也可以输入成品混音走"先分离再混"流程，最终得到响度标准化、真峰受控的成品 WAV。全部采用**开源 SOTA 模型 + 纯 Rust DSP**，无任何云端依赖。同一套能力通过三个前端交付：**CLI 与插件共享完全相同的接口与算法**（已做逐位回归）；**GUI 是两轨简化入口**，底层调用同一个引擎。
+OneMix 是一个**高度自动化的本地混音系统**：既可以输入多条已分离的乐器分轨一键混成成品，也可以输入成品混音走"先分离再混"流程，最终得到响度标准化、真峰受控的成品 WAV；还能用 **StemFX 风格迁移**把参考曲的混音风格搬到自己的分轨上。全部采用**开源 SOTA 模型 + 纯 Rust DSP**，无任何云端依赖。同一套能力通过三个前端交付：**CLI 与插件共享完全相同的接口与算法**（已做逐位回归）；**GUI 是图形简化入口**，底层调用同一个引擎。
 
 | 前端 | 形态 | 适用 |
 |---|---|---|
-| `mixer-app` | **Rust 原生桌面 GUI + CLI 双入口**（egui） | 终端用户两轨一键操作 / 无头批处理（同一二进制） |
+| `mixer-app` | **Rust 原生桌面 GUI + CLI 双入口**（egui） | 终端用户图形操作（一键混音 / 风格迁移双标签页）/ 无头批处理（同一二进制） |
 | `mixer-cli` | Rust 命令行 | 批处理 / 脚本 / 集成 |
 | `sxseditor-plugin` | SXSEditor `.sxsp` 插件 | 在 SXSEditor 内混音，并暴露给 MCP/CLI 自动化 |
 
@@ -107,6 +107,46 @@ onemix-mixer.mixFiles  {vocalsPath, accompanimentPath, outputPath, preset}
 onemix-mixer.mix       {request: <MixRequest JSON>}
 ```
 
+### 5. 风格迁移（StemFX）
+
+把**参考曲的混音风格**迁移到自己的分轨上：模型读入源/参考两套 4 轨分轨的 mel 谱与 64 维混音特征，编码成 512 维风格向量，再由 6 层 Transformer 自回归"说出"一条 multiafx 效果器链，最后用纯 Rust DSP 把这条链渲染到自己的分轨上。
+
+```bash
+# 目录里放 vocals/bass/drums/other.wav（按文件名识别乐器）
+./target/release/mixer-cli stemfx \
+  --source-dir    my_song_stems \
+  --reference-dir reference_stems \
+  -o my_song_styled.wav --lufs -23
+
+# 也可以逐轨显式指定（缺失轨按静音补齐——模型要求固定 4 轨输入）
+./target/release/mixer-cli stemfx \
+  --source bass.wav:bass --source drums.wav:drums \
+  --reference ref_vocals.wav:vocals --reference ref_other.wav:other \
+  -o out.wav --stems-out out_stems
+
+# 只看模型给的效果链，不渲染（几秒出结果）
+./target/release/mixer-cli stemfx --source-dir a --reference-dir b --dry-run --json
+```
+
+GUI：`mixer-app` → 「风格迁移 StemFX」标签页 → 选源分轨 / 参考分轨 / 输出 → 「🎛 迁移风格」或「仅看效果链」。
+
+**模型与体积**：StemFX（ISMIR 2026；BSFiLM 编码器 + 6 层 Transformer 解码器，28.6M 参数）已转成 **W8A32**（int8 权重 + fp32 激活，`MatMulNBits` bits=8、block=32、对称量化），并**用 `include_bytes!` 内嵌进二进制**，体积增量约 36 MB（encoder 4.6 MB + generator 31.8 MB + mel 滤波器组 0.3 MB）。**开箱即用、不联网、无需下载权重**；想外置覆盖时，把 `*.onnx` 放进 `--models-dir` 指向的 `stemfx/` 子目录即可优先加载。
+
+| 类别 | 覆盖情况 |
+|---|---|
+| 滤波 | `*_lowpass/highpass/bandpass/bandreject/peaking/shelf/allpass`（RBJ biquad、Butterworth 级联、sinc FIR） |
+| 动态 | 压缩 / 限幅 / 门限 / 响度归一（软拐点 + BS.1770 K-weighting） |
+| 空间与调制 | 混响（Schroeder）、延时、合唱、镶边、相位、颤音 |
+| 跳过 | 变调 / 变速 / 时间拉伸（`am_pitch_shift`、`sox_tempo`、`lib_time_stretch` 等）：纯 DSP 无高质量实现，**显式记入结果的 `skipped`**，不假装处理 |
+
+> 量化精度：编码器嵌入与 PyTorch 参考的余弦相似度 **0.994**；解码器在相同嵌入下的贪心 token 序列与 fp32 模型**完全一致**（见 `crates/mixer-core/tests/stemfx.rs`）。
+
+重建模型（可选，需要 110 MB 权重与 CPU 版 Torch）：
+
+```bash
+python scripts/fetch_stemfx.py   # hf-mirror 下权重 + gh-proxy 拉上游代码 + 导出量化
+```
+
 ## 输入模式与乐器指定
 
 ### 两种输入模式（`--mode`）
@@ -158,7 +198,8 @@ onemix/
 │   └── mixer-app/                   # Rust 原生 GUI（egui）
 ├── models/
 │   ├── onemix_dyn_enhance_v1.onnx   # 随原型分发的轻量 NN 增强模型
-│   ├── native/libonnxruntime.so     # 动态加载的 ONNX Runtime 原生库
+│   ├── stemfx/                      # StemFX W8A32 ONNX（include_bytes! 内嵌，入库）
+│   ├── native/libonnxruntime.so     # 动态加载的 ONNX Runtime 原生库（CI 提取，不入库）
 │   └── registry                     # 见 mixer-core/src/nn/registry.rs
 ├── sxseditor-plugin/                # .sxsp 插件源码（apiVersion 2）
 │   ├── manifest.json
@@ -167,7 +208,8 @@ onemix/
 │   └── panel/                       # 插件面板 UI
 ├── dist-plugins/onemix-mixer-0.1.0.sxsp  # 未签名主包（默认可装）
 ├── dist-plugins/onemix-mixer-0.1.0-signed.sxsp  # 自签名包（需先信任密钥）
-├── scripts/                         # 模型/测试音频生成脚本
+├── tools/stemfx_export/             # StemFX → ONNX(W8A32) 导出脚本
+├── scripts/                         # 模型下载/导出、测试音频生成、发布打包
 ├── docs/                            # 架构、模型选型、API、插件说明
 └── examples/fixtures/               # 合成测试音频
 ```

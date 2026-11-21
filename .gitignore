@@ -11,3 +11,6 @@
 # 系统噪声
 .DS_Store
 Thumbs.db
+
+# StemFX 导出中间产物（权重 + 上游代码缓存，由 scripts/fetch_stemfx.py 生成）
+/build/

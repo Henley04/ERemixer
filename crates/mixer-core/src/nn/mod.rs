@@ -18,37 +18,6 @@ mod imp {
         pub model_id: Option<String>,
     }
 
-    /// 各平台 ONNX Runtime 动态库文件名。
-    #[cfg(target_os = "windows")]
-    const ORT_LIB_FILE: &str = "onnxruntime.dll";
-    #[cfg(target_os = "macos")]
-    const ORT_LIB_FILE: &str = "libonnxruntime.dylib";
-    #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
-    const ORT_LIB_FILE: &str = "libonnxruntime.so";
-
-    /// 探测原生 ONNX Runtime 库路径（发布包布局：二进制同级 `models/native/`）。
-    fn find_native_lib(models_dir: Option<&str>) -> Option<PathBuf> {
-        let mut candidates: Vec<PathBuf> = Vec::new();
-        if let Some(d) = models_dir {
-            candidates.push(Path::new(d).join("native").join(ORT_LIB_FILE));
-            candidates.push(Path::new(d).join(ORT_LIB_FILE));
-        }
-        if let Ok(exe) = std::env::current_exe() {
-            if let Some(root) = exe.parent() {
-                candidates.push(root.join("models/native").join(ORT_LIB_FILE));
-                candidates.push(root.join("models").join(ORT_LIB_FILE));
-                candidates.push(root.join(ORT_LIB_FILE));
-                candidates.push(root.join("../models/native").join(ORT_LIB_FILE));
-                candidates.push(root.join("../../models/native").join(ORT_LIB_FILE));
-            }
-        }
-        if let Ok(cwd) = std::env::current_dir() {
-            candidates.push(cwd.join("models/native").join(ORT_LIB_FILE));
-            candidates.push(cwd.join(ORT_LIB_FILE));
-        }
-        candidates.into_iter().find(|p| p.exists())
-    }
-
     /// 定位 ONNX 权重文件。
     fn find_model_file(models_dir: Option<&str>, entry: &ModelEntry) -> Option<PathBuf> {
         let file = entry.local_file.as_ref()?;
@@ -155,19 +124,8 @@ mod imp {
         };
 
         let run = || -> Result<crate::AudioBuffer> {
-            // 动态加载原生库：优先显式加载，避免全局环境变量竞争。
-            let environment = if let Some(lib) = find_native_lib(models_dir) {
-                ort::init_from(&lib)
-                    .map_err(|e| MixError::Inference(format!("加载 ONNX Runtime 原生库失败: {}", e)))?
-                    .with_name("onemix")
-                    .build()
-                    .map_err(|e| MixError::Inference(format!("ORT 环境初始化失败: {}", e)))?
-            } else {
-                ort::init()
-                    .with_name("onemix")
-                    .build()
-                    .map_err(|e| MixError::Inference(format!("ORT 环境初始化失败(未找到原生库): {}", e)))?
-            };
+            // 进程级单例环境：与 StemFX 共用，避免触发 ORT 的 "only one environment" 限制。
+            let environment = crate::ort_env::env(models_dir)?;
 
             let mut builder = ort::session::Session::builder(&environment)
                 .map_err(|e| MixError::Inference(format!("会话构建器失败: {}", e)))?;
