@@ -18,6 +18,11 @@ from pathlib import Path
 
 import onnxruntime
 
+# Windows 控制台编码可能不是 UTF-8，避免打印中文/符号时崩溃。
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
