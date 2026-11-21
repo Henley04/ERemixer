@@ -99,7 +99,7 @@ cargo build --release -p mixer-app
 选择人声、伴奏、输出路径 → 调参 → 点「⚡ 一键混音」。
 
 ### 4. SXSEditor 插件
-将 `dist-plugins/onemix-mixer-0.1.0.sxsp`（**未签名主包**）拖入「插件 → 插件管理器 → 安装插件」即可。宿主默认放行未签名包；`-signed.sxsp` 用的是自签名密钥，需要先在管理器里核对指纹并「信任并安装」，否则会被 `unknown-key` 拦截。
+将 `dist-plugins/onemix-mixer-0.2.0.sxsp`（**未签名主包**）拖入「插件 → 插件管理器 → 安装插件」即可。宿主默认放行未签名包；`-signed.sxsp` 用的是自签名密钥，需要先在管理器里核对指纹并「信任并安装」，否则会被 `unknown-key` 拦截。
 
 插件读写音频依赖宿主当前的运行时边界（`ctx.fs` 只允许插件目录，绝对路径回退 `node:fs`），详见 `docs/SXSEDITOR_PLUGIN.md`。安装后可通过 MCP 调用：
 ```
@@ -206,8 +206,8 @@ onemix/
 │   ├── main.js                      # 命令 + 自动化 + 面板 RPC
 │   ├── engine.js                    # 与 Rust 逐算法对齐的 JS 移植
 │   └── panel/                       # 插件面板 UI
-├── dist-plugins/onemix-mixer-0.1.0.sxsp  # 未签名主包（默认可装）
-├── dist-plugins/onemix-mixer-0.1.0-signed.sxsp  # 自签名包（需先信任密钥）
+├── dist-plugins/onemix-mixer-0.2.0.sxsp  # 未签名主包（默认可装）
+├── dist-plugins/onemix-mixer-0.2.0-signed.sxsp  # 自签名包（需先信任密钥）
 ├── tools/stemfx_export/             # StemFX → ONNX(W8A32) 导出脚本
 ├── scripts/                         # 模型下载/导出、测试音频生成、发布打包
 ├── docs/                            # 架构、模型选型、API、插件说明

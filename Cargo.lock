@@ -2005,7 +2005,7 @@ dependencies = [
 
 [[package]]
 name = "mixer-app"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "eframe",
  "egui",
@@ -2018,7 +2018,7 @@ dependencies = [
 
 [[package]]
 name = "mixer-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clap",
  "mixer-core",
@@ -2028,7 +2028,7 @@ dependencies = [
 
 [[package]]
 name = "mixer-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "hound",
  "ort",

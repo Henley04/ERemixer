@@ -4,15 +4,15 @@
 
 | 文件 | 说明 |
 |---|---|
-| `dist-plugins/onemix-mixer-0.1.0.sxsp` | **未签名主包**，宿主默认放行（状态 `unsigned`），推荐直接安装 |
-| `dist-plugins/onemix-mixer-0.1.0-signed.sxsp` | 自签名包（Ed25519，publisher=OneMix），密钥不在宿主信任库，需先核对指纹并「信任并安装」 |
+| `dist-plugins/onemix-mixer-0.2.0.sxsp` | **未签名主包**，宿主默认放行（状态 `unsigned`），推荐直接安装 |
+| `dist-plugins/onemix-mixer-0.2.0-signed.sxsp` | 自签名包（Ed25519，publisher=OneMix），密钥不在宿主信任库，需先核对指纹并「信任并安装」 |
 
 > 注意：SXSEditor 的安装策略是「未签名可装、未知密钥拒装」（`pluginSignature.js` 的 `PASS_STATUS` 含 `unsigned`，不含 `unknown-key`）。因此把自签名包当默认分发反而会安装失败。
 
 ## 安装
 
 1. 打开 SXSEditor → **插件 → 插件管理器… → 安装插件…**
-2. 选择 `onemix-mixer-0.1.0.sxsp`
+2. 选择 `onemix-mixer-0.2.0.sxsp`
 3. 未签名包会显示「未签名」横幅，确认后安装
 4. 无需重启。菜单「插件 → onemix」、工具栏按钮与「OneMix 面板」随之出现
 

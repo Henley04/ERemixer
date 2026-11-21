@@ -25,7 +25,7 @@ function fail(ctx, err) {
 module.exports = {
   id: 'onemix-mixer',
   name: 'OneMix 一键混音',
-  version: '0.1.0',
+  version: '0.2.0',
   apiVersion: 2,
 
   initialize(ctx) {

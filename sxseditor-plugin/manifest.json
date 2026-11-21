@@ -2,7 +2,7 @@
   "apiVersion": 2,
   "id": "onemix-mixer",
   "name": "OneMix 一键混音",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "把人声与伴奏一键混合为成品母带。与 OneMix 独立软件（Rust）共享完全一致的 MixRequest/MixResult 接口、参数与混音算法；命令同时暴露给 MCP / CLI 自动化。",
   "author": "OneMix contributors",
   "main": "main.js",

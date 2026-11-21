@@ -654,7 +654,7 @@ impl eframe::App for OneMixApp {
                     Tab::Style => self.ui_style(ui),
                 }
                 ui.separator();
-                ui.label("OneMix v0.1.0 · 开源 SOTA 模型 + 纯 Rust DSP · MIT");
+                ui.label(format!("OneMix v{} · 开源 SOTA 模型 + 纯 Rust DSP · MIT", env!("CARGO_PKG_VERSION")));
             });
         });
     }
