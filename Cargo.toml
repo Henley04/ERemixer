@@ -1,0 +1,22 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/mixer-core",
+    "crates/mixer-cli",
+    "crates/mixer-app",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["OneMix contributors"]
+repository = "https://github.com/Henley04/ERemixer"
+
+[workspace.dependencies]
+mixer-core = { path = "crates/mixer-core" }
+mixer-cli = { path = "crates/mixer-cli" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+hound = "3.5"
+thiserror = "1"

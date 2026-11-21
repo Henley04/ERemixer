@@ -1,0 +1,17 @@
+[package]
+name = "mixer-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+hound.workspace = true
+thiserror.workspace = true
+ort = { version = "=2.0.0-rc.15", default-features = false, features = ["std", "load-dynamic", "api-17"], optional = true }
+
+[features]
+default = ["nn"]
+# NN 增强层（ONNX Runtime 动态加载）。关闭后仅使用纯 DSP 混音链，无需任何原生库。
+nn = ["dep:ort"]

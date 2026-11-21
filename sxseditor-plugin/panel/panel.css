@@ -1,0 +1,42 @@
+/* OneMix 面板样式（宿主下发主题变量，尽量自适应明暗）。 */
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 0;
+  font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  color: var(--text, #e6e6e6);
+  background: var(--bg, #1e1e24);
+}
+.om-header { padding: 14px 16px; border-bottom: 1px solid var(--border, #383844); }
+.om-logo { font-size: 17px; font-weight: 700; color: #6ee7b7; }
+.om-sub { margin-top: 3px; opacity: 0.65; font-size: 11px; }
+.om-body { padding: 14px 16px; }
+.om-field { margin-bottom: 10px; }
+.om-field label { display: block; margin-bottom: 4px; opacity: 0.8; font-size: 12px; }
+.om-field input, .om-field select {
+  width: 100%; padding: 7px 9px; border-radius: 6px;
+  border: 1px solid var(--border, #454550);
+  background: var(--input, #26262e); color: var(--text, #e6e6e6);
+  font-size: 12px; outline: none;
+}
+.om-field input:focus, .om-field select:focus { border-color: #6ee7b7; }
+.om-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin-top: 4px; }
+.om-check { display: flex; align-items: center; gap: 7px; margin: 6px 0 12px; opacity: 0.9; }
+.om-actions { display: flex; gap: 8px; margin-bottom: 12px; }
+.om-actions button {
+  flex: 1; padding: 9px; border: 1px solid var(--border, #454550);
+  border-radius: 6px; background: var(--btn, #2c2c36); color: var(--text, #e6e6e6);
+  cursor: pointer; font-size: 13px;
+}
+.om-actions button.primary { background: #10b981; border-color: #10b981; color: #04231a; font-weight: 700; }
+.om-actions button:disabled { opacity: 0.5; cursor: wait; }
+.om-progress { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.om-bar { flex: 1; height: 8px; border-radius: 4px; background: var(--input, #26262e); overflow: hidden; }
+.om-bar > div { height: 100%; width: 0; background: linear-gradient(90deg, #10b981, #6ee7b7); transition: width 0.2s; }
+#stage { min-width: 120px; text-align: right; opacity: 0.75; font-size: 11px; }
+pre#out {
+  margin: 0; padding: 10px; border-radius: 6px; max-height: 180px; overflow: auto;
+  background: var(--input, #14141a); font-size: 11px; line-height: 1.5; white-space: pre-wrap;
+}
+.om-note { margin: 10px 0 0; opacity: 0.55; font-size: 11px; }
+code { color: #6ee7b7; }

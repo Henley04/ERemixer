@@ -1,0 +1,289 @@
+{
+  "apiVersion": 2,
+  "id": "onemix-mixer",
+  "name": "OneMix 一键混音",
+  "version": "0.1.0",
+  "description": "把人声与伴奏一键混合为成品母带。与 OneMix 独立软件（Rust）共享完全一致的 MixRequest/MixResult 接口、参数与混音算法；命令同时暴露给 MCP / CLI 自动化。",
+  "author": "OneMix contributors",
+  "main": "main.js",
+  "engines": {
+    "app": ">=2.0.0"
+  },
+  "permissions": {
+    "fs": [
+      "pluginData",
+      "userPicked:read",
+      "userPicked:write"
+    ],
+    "ort": [
+      "cpu"
+    ],
+    "project": [
+      "read"
+    ],
+    "ui": [
+      "menu",
+      "panel",
+      "toolbar",
+      "statusBar",
+      "settings"
+    ],
+    "automation": [
+      "expose"
+    ]
+  },
+  "contributes": {
+    "commands": [
+      {
+        "id": "mix",
+        "title": {
+          "en": "One-click Mix",
+          "zh-CN": "一键混音（人声+伴奏）"
+        },
+        "description": "按 MixRequest JSON 执行一键混音，返回与 Rust 版完全一致的 MixResult。",
+        "long": true
+      },
+      {
+        "id": "mixFiles",
+        "title": {
+          "en": "Mix two files",
+          "zh-CN": "混音两个文件"
+        },
+        "description": "参数：{vocalsPath, accompanimentPath, outputPath, preset?}。使用默认参数快速混音。",
+        "long": true
+      },
+      {
+        "id": "probe",
+        "title": {
+          "en": "Probe WAV info",
+          "zh-CN": "探测 WAV 信息"
+        },
+        "description": "返回 WAV 的采样率/声道/时长。"
+      },
+      {
+        "id": "models",
+        "title": {
+          "en": "List NN models",
+          "zh-CN": "列出 NN 模型"
+        },
+        "description": "返回与 Rust 版一致的 SOTA 模型注册表。"
+      },
+      {
+        "id": "presets",
+        "title": {
+          "en": "List presets",
+          "zh-CN": "列出预设"
+        },
+        "description": "返回可用响度预设。"
+      },
+      {
+        "id": "defaults",
+        "title": {
+          "en": "Default request",
+          "zh-CN": "默认参数"
+        },
+        "description": "返回与 Rust 版一致的默认 MixRequest、预设与模型注册表。"
+      },
+      {
+        "id": "modes",
+        "title": {
+          "en": "Input modes",
+          "zh-CN": "输入模式"
+        },
+        "description": "列出输入模式：分轨直入 / 分离再混。"
+      },
+      {
+        "id": "instruments",
+        "title": {
+          "en": "Instruments",
+          "zh-CN": "乐器类型"
+        },
+        "description": "列出乐器类型与对应处理链，用于分轨指定。"
+      }
+    ],
+    "menus": [
+      {
+        "path": "plugins/onemix",
+        "command": "mix",
+        "title": {
+          "en": "Open OneMix panel",
+          "zh-CN": "打开 OneMix 面板"
+        }
+      }
+    ],
+    "panels": [
+      {
+        "id": "main",
+        "title": {
+          "en": "OneMix · One-click Mixer",
+          "zh-CN": "OneMix · 一键混音"
+        },
+        "entry": "panel/index.html",
+        "width": 440,
+        "apiScopes": [
+          "command.run",
+          "ui.notify",
+          "ui.progress"
+        ]
+      }
+    ],
+    "toolbar": [
+      {
+        "id": "mix",
+        "command": "mix",
+        "title": {
+          "en": "OneMix",
+          "zh-CN": "一键混音"
+        },
+        "icon": "audio-speakers",
+        "group": "onemix"
+      }
+    ],
+    "statusBar": [
+      {
+        "id": "status",
+        "command": "mix",
+        "text": {
+          "en": "@idle",
+          "zh-CN": "@idle"
+        },
+        "tooltip": {
+          "en": "OneMix one-click mixer",
+          "zh-CN": "OneMix 一键混音"
+        },
+        "alignment": "right"
+      }
+    ],
+    "settings": [
+      {
+        "id": "general",
+        "title": {
+          "en": "OneMix",
+          "zh-CN": "OneMix"
+        },
+        "fields": [
+          {
+            "key": "targetLufs",
+            "type": "number",
+            "default": -14,
+            "min": -24,
+            "max": -8,
+            "label": {
+              "en": "Target loudness (LUFS)",
+              "zh-CN": "目标响度 (LUFS)"
+            },
+            "description": {
+              "en": "-14 for streaming, -16 broadcast, -12 loud",
+              "zh-CN": "-14 流媒体，-16 广播，-12 响亮"
+            }
+          },
+          {
+            "key": "truePeak",
+            "type": "number",
+            "default": -1,
+            "min": -6,
+            "max": 0,
+            "label": {
+              "en": "True peak ceiling (dBTP)",
+              "zh-CN": "真峰上限 (dBTP)"
+            }
+          },
+          {
+            "key": "ducking",
+            "type": "number",
+            "default": -2.5,
+            "min": -12,
+            "max": 0,
+            "label": {
+              "en": "Sidechain ducking (dB)",
+              "zh-CN": "伴奏闪避 (dB)"
+            }
+          },
+          {
+            "key": "vocalGain",
+            "type": "number",
+            "default": 0,
+            "min": -12,
+            "max": 12,
+            "label": {
+              "en": "Vocal gain (dB)",
+              "zh-CN": "人声增益 (dB)"
+            }
+          },
+          {
+            "key": "nnEnhance",
+            "type": "boolean",
+            "default": false,
+            "label": {
+              "en": "Enable NN enhancement",
+              "zh-CN": "启用 NN 音质增强"
+            }
+          },
+          {
+            "key": "preset",
+            "type": "select",
+            "default": "streaming",
+            "label": {
+              "en": "Preset",
+              "zh-CN": "预设"
+            },
+            "options": [
+              {
+                "value": "streaming",
+                "label": {
+                  "en": "Streaming (-14)",
+                  "zh-CN": "流媒体 (-14)"
+                }
+              },
+              {
+                "value": "broadcast",
+                "label": {
+                  "en": "Broadcast (-16)",
+                  "zh-CN": "广播 (-16)"
+                }
+              },
+              {
+                "value": "quiet",
+                "label": {
+                  "en": "Quiet (-20)",
+                  "zh-CN": "安静 (-20)"
+                }
+              },
+              {
+                "value": "loud",
+                "label": {
+                  "en": "Loud (-12)",
+                  "zh-CN": "响亮 (-12)"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "i18n": {
+      "en": {
+        "idle": "OneMix ready",
+        "working": "Mixing…",
+        "done": "Mix done"
+      },
+      "zh-CN": {
+        "idle": "OneMix 就绪",
+        "working": "混音中…",
+        "done": "混音完成"
+      }
+    },
+    "automation": {
+      "methods": [
+        "mix",
+        "mixFiles",
+        "probe",
+        "models",
+        "modes",
+        "instruments",
+        "presets",
+        "defaults"
+      ]
+    }
+  }
+}

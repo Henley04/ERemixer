@@ -1,0 +1,13 @@
+# Rust 构建产物
+/target/
+**/*.rs.bk
+
+# 发布打包中间产物
+/dist/
+
+# 原生 ONNX Runtime 库由 CI 从 onnxruntime wheel 提取，不入库
+/models/native/
+
+# 系统噪声
+.DS_Store
+Thumbs.db

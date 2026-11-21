@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OneMix · 一键混音系统</title>
+<style>
+  :root { --bg:#0e1117; --card:#171b24; --line:#2a3140; --fg:#e6edf3; --muted:#8b98a9; --green:#10b981; --green2:#6ee7b7; --blue:#3b82f6; --purple:#a78bfa; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif; line-height:1.6; }
+  .wrap { max-width:1120px; margin:0 auto; padding:32px 22px 70px; }
+  header { text-align:center; padding:26px 0 18px; }
+  .logo { font-size:44px; font-weight:800; letter-spacing:1px; background:linear-gradient(90deg,var(--green2),var(--blue)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .tag { color:var(--muted); font-size:15px; margin-top:6px; }
+  .badges { margin-top:14px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+  .badge { background:#1c2530; border:1px solid var(--line); border-radius:20px; padding:5px 13px; font-size:12px; color:var(--green2); }
+  h2 { font-size:20px; margin:34px 0 14px; padding-left:11px; border-left:3px solid var(--green); }
+  .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .grid2 { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px; }
+  .card h3 { margin:0 0 8px; font-size:15px; }
+  .card .k { color:var(--green2); font-weight:600; }
+  .card p { color:var(--muted); font-size:13px; margin:6px 0 0; }
+  .arch { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; overflow:auto; }
+  .flow { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center; padding:8px 0; }
+  .node { background:#1c2530; border:1px solid var(--line); border-radius:8px; padding:8px 12px; font-size:12px; text-align:center; }
+  .node.hl { border-color:var(--green); color:var(--green2); }
+  .arrow { color:var(--muted); }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th,td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); }
+  th { color:var(--green2); font-weight:600; }
+  td { color:var(--muted); }
+  code { background:#0b0f16; border:1px solid var(--line); border-radius:5px; padding:2px 7px; font-size:12px; color:#a5d6ff; }
+  pre { background:#0b0f16; border:1px solid var(--line); border-radius:8px; padding:14px; overflow:auto; font-size:12px; color:#a5d6ff; }
+  .ok { color:var(--green); font-weight:700; }
+  .metric { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--line); font-size:13px; }
+  .metric span:last-child { color:var(--green2); font-family:monospace; }
+  footer { text-align:center; color:var(--muted); font-size:12px; margin-top:40px; }
+  @media(max-width:760px){ .grid3,.grid2{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">◉ OneMix</div>
+    <div class="tag">高度自动化一键混音 · 开源 SOTA 神经网络模型 + 纯 Rust DSP · CLI 与插件逐位一致</div>
+    <div class="badges">
+      <span class="badge">Rust Native GUI + CLI</span>
+      <span class="badge">ONNX Runtime</span>
+      <span class="badge">EBU R128 LUFS</span>
+      <span class="badge">分轨直入 / 分离再混</span>
+      <span class="badge">SXSEditor 插件 apiVersion 2</span>
+      <span class="badge">MIT</span>
+    </div>
+  </header>
+
+  <h2>一套引擎，三处消费</h2>
+  <div class="arch">
+    <div class="flow">
+      <div class="node hl">mixer-core<br><small>Rust 静态库</small></div>
+      <span class="arrow">▶</span>
+      <div class="node">DSP 链<br><small>滤波/压缩/侧链</small></div>
+      <div class="node">响度引擎<br><small>K-weight/LUFS/真峰</small></div>
+      <div class="node">NN 适配层<br><small>ONNX 动态加载</small></div>
+    </div>
+    <div class="flow" style="margin-top:6px;">
+      <span class="arrow">▼ 共享 MixRequest / MixResult schema ▼</span>
+    </div>
+    <div class="flow">
+      <div class="node hl">mixer-app<br><small>GUI + CLI 双入口</small></div>
+      <div class="node hl">mixer-cli<br><small>命令行 / 批处理</small></div>
+      <div class="node hl">SXSEditor 插件<br><small>engine.js 逐算法移植 + ctx.ort</small></div>
+    </div>
+  </div>
+
+  <h2>输入模式与乐器推断</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>两种模式 <code>--mode</code></h3>
+      <div class="metric"><span>stems（默认）</span><span>分轨直入 · 跳过分离模型</span></div>
+      <div class="metric"><span>separate</span><span>成品先分离再混 · 权重缺失时降级</span></div>
+      <p style="margin-top:12px"><b>输入不需要指定乐器</b>——只输入轨道即可，引擎按文件名自动推断；需要时才用 <code>path:instrument</code> 显式覆盖。</p>
+    </div>
+    <div class="card">
+      <h3>乐器专属处理链</h3>
+      <div class="metric"><span>vocals 人声</span><span>HPF/存在感/压缩/侧链主控</span></div>
+      <div class="metric"><span>drums 鼓</span><span>瞬态保留 + 透明压缩</span></div>
+      <div class="metric"><span>bass 贝斯</span><span>单声道低频 + 紧压缩</span></div>
+      <div class="metric"><span>instrumental 伴奏</span><span>中频雕刻 + 闪避</span></div>
+      <div class="metric"><span>other 其他</span><span>温和 EQ + 轻压缩（兜底）</span></div>
+    </div>
+  </div>
+
+  <h2>能力一致性实测（同一素材）</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Rust 引擎（CLI / GUI）</h3>
+      <div class="metric"><span>输出响度</span><span>-14.00 LUFS</span></div>
+      <div class="metric"><span>真峰（4× sinc 重建）</span><span>-2.27 dBTP</span></div>
+      <div class="metric"><span>时长 / 采样率</span><span>8.0s / 48000 Hz</span></div>
+      <div class="metric"><span>NN 增强</span><span>ONNX 推理已验证</span></div>
+    </div>
+    <div class="card">
+      <h3>插件引擎（JS · ctx.ort）</h3>
+      <div class="metric"><span>输出响度</span><span>-14.00 LUFS</span></div>
+      <div class="metric"><span>真峰（4× sinc 重建）</span><span>-2.27 dBTP</span></div>
+      <div class="metric"><span>时长 / 采样率</span><span>8.0s / 48000 Hz</span></div>
+      <div class="metric"><span>一致性</span><span class="ok">✓ 响度与真峰逐位一致</span></div>
+    </div>
+  </div>
+
+  <h2>开源 SOTA 模型注册表</h2>
+  <table>
+    <tr><th>模型</th><th>架构</th><th>指标</th><th>角色</th></tr>
+    <tr><td>BS-RoFormer</td><td>Band-Split RoPE Transformer</td><td>MUSDB18-HQ SOTA，人声 ≈10.9 dB SDR</td><td>人声分离</td></tr>
+    <tr><td>HT-Demucs FT</td><td>Hybrid Transformer Demucs</td><td>4 源 ≈9.0 dB SDR，生产默认</td><td>通用分流</td></tr>
+    <tr><td>Mel-Band RoFormer</td><td>Mel-Band Split RoPE Transformer</td><td>去混响优于同族</td><td>人声净化</td></tr>
+    <tr><td>onemix-dyn-v1</td><td>Conv1d-ReLU-Conv1d-Tanh</td><td>375B，随原型分发</td><td>NN 音质增强（默认可用）</td></tr>
+  </table>
+
+  <h2>一键混音链</h2>
+  <div class="arch">
+    <div class="flow">
+      <div class="node">解码/重采样</div><span class="arrow">→</span>
+      <div class="node">NN 增强</div><span class="arrow">→</span>
+      <div class="node">逐轨专属链<br><small>按乐器类型</small></div><span class="arrow">→</span>
+      <div class="node hl">人声侧链 ducking</div><span class="arrow">→</span>
+      <div class="node">总线 glue</div><span class="arrow">→</span>
+      <div class="node hl">响度标准化<br><small>-14 LUFS</small></div><span class="arrow">→</span>
+      <div class="node">真峰限幅<br><small>前瞻 + 终检</small></div><span class="arrow">→</span>
+      <div class="node hl">成品 WAV</div>
+    </div>
+  </div>
+
+  <h2>快速使用</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>原生 GUI / 主应用 CLI</h3>
+      <pre>./target/release/mixer-app          # GUI
+./target/release/mixer-app modes    # 当 CLI 用
+mixer-app mix --stems a.wav:vocals \
+  --stems b.wav:drums -o out.wav</pre>
+    </div>
+    <div class="card">
+      <h3>命令行（分轨直入）</h3>
+      <pre>mixer-cli mix \
+  --stems vocal.wav --stems drums.wav \
+  --stems bass.wav -o final.wav \
+  --json  # 乐器自动推断</pre>
+    </div>
+    <div class="card">
+      <h3>SXSEditor 插件</h3>
+      <p>安装 <code>onemix-mixer-0.1.0.sxsp</code> 后，通过 MCP 或插件面板调用：</p>
+      <pre>onemix-mixer.mixFiles
+ {vocalsPath, accompanimentPath,
+  outputPath, preset}</pre>
+    </div>
+    <div class="card">
+      <h3>一键构建 + 校验</h3>
+      <pre>./build.sh
+# 编译 → 测试 → 一致性回归</pre>
+    </div>
+  </div>
+
+  <h2>交付物</h2>
+  <div class="grid3">
+    <div class="card"><h3 class="k">target/release/</h3><p>mixer-app（GUI，20MB）<br>mixer-cli（CLI，1.7MB）</p></div>
+    <div class="card"><h3 class="k">dist-plugins/</h3><p>onemix-mixer-0.1.0.sxsp<br>未签名主包（默认可装）· checksum 通过<br><small>-signed.sxsp 需先信任密钥</small></p></div>
+    <div class="card"><h3 class="k">docs/</h3><p>ARCHITECTURE · API<br>SXSEDITOR_PLUGIN · README</p></div>
+  </div>
+
+  <footer>OneMix v0.1.0 · Rust 1.93 · ort 2.0rc · egui 0.29 · 测试 21/21 通过 · 一致性回归逐位通过 · 审查报告 docs/REVIEW.md</footer>
+</div>
+</body>
+</html>

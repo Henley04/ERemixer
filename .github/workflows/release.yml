@@ -1,0 +1,128 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "要发布的 tag（例如 v0.1.0）"
+        required: true
+        default: "v0.1.0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  ORT_VERSION: "1.24.1"
+
+jobs:
+  build:
+    name: build-${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux-x86_64
+            os: ubuntu-22.04
+          - platform: windows-x86_64
+            os: windows-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Rust 工具链
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: 缓存 Rust 构建
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.platform }}
+
+      - name: 安装 Linux 图形构建依赖
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libxkbcommon-dev libwayland-dev libx11-dev libxcb1-dev \
+            libgl1-mesa-dev libegl1-mesa-dev
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 提取 ONNX Runtime 原生库
+        shell: bash
+        run: |
+          python -m pip install --disable-pip-version-check "onnxruntime==${ORT_VERSION}"
+          python scripts/fetch_ort.py --dest models/native
+
+      - name: 编译 release 二进制
+        shell: bash
+        run: cargo build --release --locked -p mixer-cli -p mixer-app
+
+      - name: 运行核心单元测试
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          ORT_DYLIB_PATH: ${{ github.workspace }}/models/native/libonnxruntime.so
+        run: cargo test --release --locked -p mixer-core
+
+      - name: 组装发布包
+        shell: bash
+        run: python scripts/package_release.py --platform ${{ matrix.platform }}
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+          if-no-files-found: error
+
+  release:
+    name: publish-release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: 下载各平台产物
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: 列出待发布文件
+        run: ls -lh artifacts
+
+      - name: 创建 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          name: ERemixer ${{ inputs.tag || github.ref_name }}
+          target_commitish: ${{ github.sha }}
+          fail_on_unmatched_files: true
+          files: artifacts/*
+          body: |
+            ERemixer 一键混音器预编译版本。
+
+            **包含**
+            - `mixer-cli`：命令行混音（分轨直入 / 传统两轨 / 成品分离）
+            - `mixer-app`：egui 桌面 GUI，同时支持 CLI 子命令
+            - ONNX Runtime 1.24.1 + 轻量 NN 增强模型（解压即用）
+            - SXSEditor 插件 `onemix-mixer-*.sxsp`
+
+            **下载**
+            - Windows x64：`ERemixer-*-windows-x86_64.zip`
+            - Linux x86_64：`ERemixer-*-linux-x86_64.tar.gz`
+
+            解压后运行 `mixer-cli mix --stems ...` 或直接启动 `mixer-app`。
+            详见包内 `RUNNING.txt` 与 `README.md`。
