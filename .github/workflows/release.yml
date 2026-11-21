@@ -14,6 +14,11 @@ on:
 permissions:
   contents: write
 
+# 说明：若仓库 Settings → Actions → General → Workflow permissions 仍是
+# “Read repository contents”，GITHUB_TOKEN 无法创建 Release（403）。
+# 两种解法：
+#   1) 把该设置改为 “Read and write permissions”（推荐）；
+#   2) 添加 RELEASE_TOKEN secret（需 contents: write），下面的 token 会自动回退。
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
@@ -107,6 +112,7 @@ jobs:
       - name: 创建 GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.RELEASE_TOKEN || github.token }}
           tag_name: ${{ inputs.tag || github.ref_name }}
           name: ERemixer ${{ inputs.tag || github.ref_name }}
           target_commitish: ${{ github.sha }}
